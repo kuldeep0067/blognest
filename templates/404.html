@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="empty-state">
+    <h1>404</h1>
+    <h4>Page not found.</h4>
+
+    <a href="{{ url_for('home') }}" class="btn btn-primary rounded-pill mt-3">
+        Go Home
+    </a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="profile-card">
+    <h2 class="fw-bold">Your Profile</h2>
+    <p class="text-muted">Update your public writer profile.</p>
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}" class="profile-img">
+        </div>
+
+        <div class="mb-3">
+            {{ form.profile_image.label(class="form-label") }}
+            {{ form.profile_image(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.bio.label(class="form-label") }}
+            {{ form.bio(class="form-control", rows="4") }}
+        </div>
+
+        {{ form.submit(class="btn btn-primary rounded-pill") }}
+    </form>
+
+    <hr>
+
+    <p><strong>Email:</strong> {{ current_user.email }}</p>
+    <p><strong>Joined:</strong> {{ current_user.created_at.strftime("%d %b %Y") }}</p>
+</div>
+
+{% endblock %}

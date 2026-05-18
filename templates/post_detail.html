@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<article class="article-card">
+    <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" class="detail-img mb-4">
+    <div class="mb-3">
+        <span class="category-pill">{{ post.category }}</span>
+        <small class="text-muted ms-2">{{ post.views }} views</small>
+    </div>
+
+    <h1 class="fw-bold">{{ post.title }}</h1>
+
+    <p class="text-muted">
+        By 
+        <a href="{{ url_for('author_profile', username=post.author.username) }}">
+           <strong>{{ post.author.username }}</strong>
+        </a>  
+        • {{ post.created_at.strftime("%d %b %Y") }}
+    </p>
+
+    <div class="tags mb-4">
+        {% for tag in post.tag_list() %}
+            <span>#{{ tag }}</span>
+        {% endfor %}
+    </div>
+
+    <p class="lead">{{ post.summary }}</p>
+
+    <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST" class="mb-4">
+        <button class="btn btn-outline-danger rounded-pill">
+            ❤️ Like
+        </button>
+
+        <span class="ms-2 fw-semibold">
+        {{ post.likes|length }} likes
+        </span>
+    </form>
+
+    <form action="{{ url_for('bookmark_post', post_id=post.id) }}" method="POST" class="mb-4">
+         <button class="btn btn-outline-primary rounded-pill">
+            🔖 Save Post
+         </button>
+
+         <span class="ms-2 fw-semibold">
+             {{ post.bookmarks|length }} saves
+         </span>
+    </form>
+
+    <hr>
+
+    <div class="post-content">
+        {{ post.content | safe }}
+    </div>
+
+    {% if current_user.is_authenticated and current_user == post.author %}
+        <div class="mt-4">
+            <a href="{{ url_for('edit_post', slug=post.slug) }}" class="btn btn-outline-primary">
+                Edit Post
+            </a>
+
+            <form action="{{ url_for('delete_post', slug=post.slug) }}" method="POST" class="d-inline">
+                <button class="btn btn-outline-danger" onclick="return confirm('Delete this post?')">
+                    Delete Post
+                </button>
+            </form>
+        </div>
+    {% endif %}
+</article>
+
+<section class="comments-section mt-4">
+    <h3 class="fw-bold">Comments ({{ comments|length }})</h3>
+
+    {% if current_user.is_authenticated %}
+        <form method="POST" class="comment-form mb-4">
+            {{ form.hidden_tag() }}
+
+            {{ form.content(
+                class="form-control",
+                rows="3",
+                placeholder="Write your comment..."
+            ) }}
+
+            {{ form.submit(class="btn btn-primary mt-2 rounded-pill") }}
+        </form>
+    {% else %}
+        <div class="alert alert-info rounded-4">
+            Please <a href="{{ url_for('login') }}">login</a> to comment.
+        </div>
+    {% endif %}
+
+    {% for comment in comments %}
+        <div class="comment-card">
+            <div class="d-flex justify-content-between">
+                <strong>{{ comment.comment_author.username }}</strong>
+                <small class="text-muted">
+                    {{ comment.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                </small>
+            </div>
+
+            <p class="mb-2">{{ comment.content }}</p>
+
+            {% if current_user.is_authenticated and (current_user == comment.comment_author or current_user == post.author) %}
+                <form action="{{ url_for('delete_comment', comment_id=comment.id) }}" method="POST">
+                    <button class="btn btn-sm btn-outline-danger">
+                        Delete
+                    </button>
+                </form>
+            {% endif %}
+
+            {% if current_user.is_authenticated %}
+                <form action="{{ url_for('reply_comment', comment_id=comment.id) }}" method="POST" class="mt-2">
+                   <input type="text" name="reply" class="form-control mb-2" placeholder="Write a reply...">
+                   <button class="btn btn-sm btn-outline-primary rounded-pill">
+                        Reply
+                   </button>
+                </form>
+            {% endif %}
+
+            {% for reply in comment.replies %}
+                <div class="comment-card ms-4 mt-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>{{ reply.comment_author.username }}</strong>
+                        <small class="text-muted">
+                          {{ reply.created_at.strftime("%d %b %Y, %I:%M %p") }}
+                        </small>
+                    </div>
+
+                    <p class="mb-2">{{ reply.content }}</p>
+                </div>
+            {% endfor %}
+
+
+        </div>
+    {% else %}
+        <p class="text-muted">No comments yet. Be the first one.</p>
+    {% endfor %}
+</section>
+
+{% endblock %}

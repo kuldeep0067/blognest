@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero-section rounded-5 p-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <span class="badge hero-badge mb-3">Python Flask Blog Platform</span>
+
+            <h1 class="display-5 fw-bold">
+                Create, manage and discuss blogs beautifully.
+            </h1>
+
+            <p class="lead mt-3">
+                BlogNest is a complete blogging app with authentication, posts,
+                comments, search, dashboard and a clean responsive UI.
+            </p>
+
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('create_post') }}" class="btn btn-light btn-lg mt-3">
+                    Write your first post
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg mt-3">
+                    Start writing
+                </a>
+
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg mt-3 ms-2">
+                    Login
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-5 mt-4 mt-lg-0">
+            <div class="hero-card">
+                <h5>✨ Features</h5>
+
+                <ul class="mb-0">
+                    <li>Secure authentication</li>
+                    <li>CRUD blog posts</li>
+                    <li>Comment system</li>
+                    <li>Dashboard analytics</li>
+                    <li>Search system</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="fw-bold mb-0">Latest Posts</h2>
+
+            {% if search %}
+                <span class="badge text-bg-primary">Search: {{ search }}</span>
+            {% endif %}
+        </div>
+
+        {% if posts.items %}
+            <div class="row g-4">
+                {% for post in posts.items %}
+                    <div class="col-md-6">
+                        <div class="post-card h-100">
+                            <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" class="post-img mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="category-pill">{{ post.category }}</span>
+                                <small class="text-muted">{{ post.views }} views</small>
+                            </div>
+
+                            <h4>
+                                <a href="{{ url_for('post_detail', slug=post.slug) }}">
+                                    {{ post.title }}
+                                </a>
+                            </h4>
+
+                            <p class="text-muted">{{ post.summary }}</p>
+
+                            <div class="tags mb-3">
+                                {% for tag in post.tag_list() %}
+                                    <span>#{{ tag }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <small>
+                                    By
+                                    <a href="{{ url_for('author_profile', username=post.author.username) }}">
+                                       <strong>{{ post.author.username }}</strong>
+                                    </a>
+                                </small>
+                                
+                                <small>{{ post.created_at.strftime("%d %b %Y") }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('home', page=posts.prev_num, search=search) }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            <li class="page-item {% if posts.page == page_num %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('home', page=page_num, search=search) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if posts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('home', page=posts.next_num, search=search) }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <div class="empty-state">
+                <h4>No posts found</h4>
+                <p>Create the first blog post and start your writing journey.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sidebar-card mb-4">
+            <h5 class="fw-bold">Categories</h5>
+
+            <a href="{{ url_for('home') }}" class="category-link {% if not active_category %}active{% endif %}">
+               All
+            </a>
+
+            {% for category in categories %}
+                 <a href="{{ url_for('home', category=category) }}" class="category-link {% if active_category == category %}active{% endif %}">
+                 {{ category }}
+                 </a>
+             {% endfor %}
+        </div>
+
+        <div class="sidebar-card">
+            <h5 class="fw-bold">Recent Posts</h5>
+
+            {% for post in latest_posts %}
+                <div class="recent-post">
+                    <a href="{{ url_for('post_detail', slug=post.slug) }}">
+                        {{ post.title }}
+                    </a>
+                    <small>{{ post.created_at.strftime("%d %b %Y") }}</small>
+                </div>
+            {% else %}
+                <p class="text-muted">No recent posts yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

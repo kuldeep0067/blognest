@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="dashboard-header rounded-5 p-4 mb-4">
+    <h1 class="fw-bold">Admin Dashboard</h1>
+    <p class="mb-0">Manage users, posts and comments.</p>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h3>{{ users|length }}</h3>
+            <p>Total Users</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h3>{{ posts|length }}</h3>
+            <p>Total Posts</p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h3>{{ comments|length }}</h3>
+            <p>Total Comments</p>
+        </div>
+    </div>
+</div>
+
+<h3 class="fw-bold mb-3">All Posts</h3>
+
+<div class="table-responsive dashboard-table mb-5">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for post in posts %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('post_detail', slug=post.slug) }}">
+                            {{ post.title }}
+                        </a>
+                    </td>
+
+                    <td>{{ post.author.username }}</td>
+                    <td>{{ post.status }}</td>
+                    <td>{{ post.views }}</td>
+
+                    <td class="text-end">
+                        <form action="{{ url_for('admin_delete_post', post_id=post.id) }}" method="POST">
+                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this post?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h3 class="fw-bold mb-3">All Comments</h3>
+
+<div class="table-responsive dashboard-table">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Comment</th>
+                <th>User</th>
+                <th>Post</th>
+                <th class="text-end">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for comment in comments %}
+                <tr>
+                    <td>{{ comment.content[:60] }}...</td>
+                    <td>{{ comment.comment_author.username }}</td>
+                    <td>{{ comment.post.title }}</td>
+
+                    <td class="text-end">
+                        <form action="{{ url_for('admin_delete_comment', comment_id=comment.id) }}" method="POST">
+                            <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this comment?')">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="profile-card mb-4">
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='uploads/' + user.profile_image) }}" class="profile-img">
+    </div>
+
+    <h2 class="fw-bold">{{ user.username }}</h2>
+
+    <p class="text-muted">
+        {{ user.bio }}
+    </p>
+
+    <p>
+        <strong>Total Posts:</strong> {{ posts|length }}
+    </p>
+
+    <p>
+        <strong>Joined:</strong> {{ user.created_at.strftime("%d %b %Y") }}
+    </p>
+   
+    <div class="d-flex gap-3 mb-3">
+        <span><strong>{{ followers_count }}</strong> Followers</span>
+        <span><strong>{{ following_count }}</strong> Following</span>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.id != user.id %}
+        <form action="{{ url_for('follow_user', user_id=user.id) }}" method="POST">
+            <button class="btn btn-primary rounded-pill">
+               {% if is_following %}
+                   Unfollow
+               {% else %}
+                   Follow
+               {% endif %}
+            </button>
+        </form>
+    {% endif %}
+
+</div>
+
+<h3 class="fw-bold mb-3">{{ user.username }}'s Posts</h3>
+
+{% if posts %}
+    <div class="row g-4">
+        {% for post in posts %}
+            <div class="col-md-6">
+                <div class="post-card h-100">
+
+                    <img src="{{ url_for('static', filename='uploads/' + post.image_file) }}" class="post-img mb-3">
+
+                    <span class="category-pill mb-2">{{ post.category }}</span>
+
+                    <h4>
+                        <a href="{{ url_for('post_detail', slug=post.slug) }}">
+                            {{ post.title }}
+                        </a>
+                    </h4>
+
+                    <p class="text-muted">{{ post.summary }}</p>
+
+                    <small>
+                        {{ post.created_at.strftime("%d %b %Y") }}
+                    </small>
+
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <h4>No posts yet</h4>
+        <p>This author has not published anything yet.</p>
+    </div>
+{% endif %}
+
+{% endblock %}
