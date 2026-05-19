@@ -40,15 +40,27 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 jwt = JWTManager(app)
-db_user = os.getenv("DB_USER")
-db_password = quote_plus(os.getenv("DB_PASSWORD"))
-db_host = os.getenv("DB_HOST")
-db_port = os.getenv("DB_PORT")
-db_name = os.getenv("DB_NAME")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-)
+database_url = os.getenv("DATABASE_URL")
+
+if database_url:
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+else:
+    db_user = os.getenv("DB_USER")
+    db_password = quote_plus(os.getenv("DB_PASSWORD"))
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
+
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    )
+    
+    
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = "static/uploads"
 
