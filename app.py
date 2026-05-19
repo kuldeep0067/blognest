@@ -345,7 +345,7 @@ def api_posts():
             "summary": post.summary,
             "category": post.category,
             "image_file": post.image_file,
-            "image_url": f"http://127.0.0.1:5000/static/uploads/{post.image_file}" if post.image_file else None,
+           "image_url": f"{request.host_url}static/uploads/{post.image_file}" if post.image_file else None,
             "author": post.author.username,
             "views": post.views,
             "likes": len(post.likes),
