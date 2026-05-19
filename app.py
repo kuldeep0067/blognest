@@ -200,7 +200,12 @@ def register():
             flash("Username or email already exists.", "danger")
             return redirect(url_for("register"))
 
-        user = User(username=form.username.data, email=form.email.data)
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            is_verified=True
+        )
+        
         user.set_password(form.password.data)
 
         db.session.add(user)
