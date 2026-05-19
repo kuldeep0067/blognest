@@ -1628,7 +1628,8 @@ def handle_private_message(data):
         broadcast=True
     )
 
-
+with app.app_context():
+    db.create_all()
      
 if __name__ == "__main__":
     socketio.run(app, debug=True)
