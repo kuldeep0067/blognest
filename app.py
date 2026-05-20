@@ -26,7 +26,11 @@ load_dotenv()
 
 app = Flask(__name__)
 
-from flask_cors import CORS
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*"
+)
+
 
 CORS(
     app,
@@ -44,8 +48,6 @@ genai.configure(
 
 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
 
-socketio = SocketIO(app)
-CORS(app)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 serializer = URLSafeTimedSerializer(app.config["SECRET_KEY"])
@@ -1579,29 +1581,14 @@ def forbidden(error):
 def not_found(error):
     return render_template("404.html"), 404
 
-online_users = {}
-
-@socketio.on("user_connected")
-def handle_user_connected(data):
-    username = data.get("username", "Guest")
-
-    online_users[request.sid] = username
-
-    socketio.emit(
-        "online_users",
-        list(set(online_users.values()))
-    )
+@socketio.on("connect")
+def handle_connect():
+    print("User connected")
 
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    if request.sid in online_users:
-        del online_users[request.sid]
-
-    socketio.emit(
-        "online_users",
-        list(set(online_users.values()))
-    )
+    print("User disconnected")
 
 
 @socketio.on("send_message")
@@ -1611,40 +1598,5 @@ def handle_send_message(data):
         data
     )
 
-@socketio.on("send_private_message")
-def handle_private_message(data):
-    sender = data["sender"]
-
-    receiver = data["receiver"]
-
-    content = data["message"]
-
-    sender_user = User.query.filter_by(
-        username=sender
-    ).first()
-
-    receiver_user = User.query.filter_by(
-        username=receiver
-    ).first()
-
-    if sender_user and receiver_user:
-        message = Message(
-            sender_id=sender_user.id,
-            receiver_id=receiver_user.id,
-            content=content
-        )
-
-        db.session.add(message)
-        db.session.commit()
-
-    emit(
-        "receive_private_message",
-        data,
-        broadcast=True
-    )
-
-with app.app_context():
-    db.create_all()
-     
 if __name__ == "__main__":
     socketio.run(app, debug=True)
