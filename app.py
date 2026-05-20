@@ -26,15 +26,17 @@ load_dotenv()
 
 app = Flask(__name__)
 
+from flask_cors import CORS
+
 CORS(
     app,
-    origins=["https://thisblognest.netlify.app"],
+    resources={
+        r"/api/*": {
+            "origins": "https://thisblognest.netlify.app"
+        }
+    },
     supports_credentials=True
 )
-
-
-
-
 
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY")
@@ -42,7 +44,7 @@ genai.configure(
 
 gemini_model = genai.GenerativeModel("gemini-2.0-flash")
 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app)
 CORS(app)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
