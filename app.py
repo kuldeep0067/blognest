@@ -400,7 +400,7 @@ def api_post_comments(post_id):
     post = Post.query.get_or_404(post_id)
 
     if request.method == "POST":
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
 
         if not user_id:
             return {
