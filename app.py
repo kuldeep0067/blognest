@@ -26,6 +26,14 @@ load_dotenv()
 
 app = Flask(__name__)
 
+CORS(
+    app,
+    origins=["https://thisblognest.netlify.app"],
+    supports_credentials=True
+)
+
+
+
 
 
 genai.configure(
