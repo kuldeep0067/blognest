@@ -2,6 +2,11 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+db = SQLAlchemy()
 
 
 class RegisterForm(FlaskForm):
@@ -135,3 +140,17 @@ class ResetPasswordForm(FlaskForm):
     )
 
     submit = SubmitField("Reset Password")
+    
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    username = db.Column(db.String(80), nullable=False)
+
+    message = db.Column(db.Text, nullable=False)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )    
+    
+    

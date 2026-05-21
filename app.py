@@ -36,7 +36,11 @@ CORS(
     app,
     resources={
         r"/api/*": {
-            "origins": "https://thisblognest.netlify.app"
+            "origins": [
+                "http://localhost:5173",
+                "http://127.0.0.1:5173",
+                "https://thisblognest.netlify.app"
+            ]
         }
     },
     supports_credentials=True
@@ -76,7 +80,7 @@ else:
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = "static/uploads"
 
-from models import db, login_manager, User, Post, Comment, Like, Bookmark, Follow, Notification,Message
+from models import db, login_manager, User, Post, Comment, Like, Bookmark, Follow, Notification,Message,ChatMessage
 
 db.init_app(app)
 
@@ -820,6 +824,29 @@ def api_notifications():
         "success": True,
         "notifications": notifications_data
     }
+
+@app.route("/api/chat/messages")
+@jwt_required()
+def api_chat_messages():
+    messages = ChatMessage.query.order_by(
+        ChatMessage.created_at.asc()
+    ).limit(100).all()
+
+    messages_data = []
+
+    for msg in messages:
+        messages_data.append({
+            "id": msg.id,
+            "username": msg.username,
+            "message": msg.message,
+            "created_at": msg.created_at.strftime("%d %b %Y, %I:%M %p")
+        })
+
+    return {
+        "success": True,
+        "messages": messages_data
+    }
+
 
 @app.route("/api/messages/<username>")
 @jwt_required()
@@ -1593,10 +1620,25 @@ def handle_disconnect():
 
 @socketio.on("send_message")
 def handle_send_message(data):
+    chat_message = ChatMessage(
+        username=data["username"],
+        message=data["message"]
+    )
+
+    db.session.add(chat_message)
+    db.session.commit()
+
+    data["created_at"] = chat_message.created_at.strftime(
+        "%d %b %Y, %I:%M %p"
+    )
+
     socketio.emit(
         "receive_message",
         data
     )
+
+with app.app_context():
+    db.create_all()
 
 if __name__ == "__main__":
     socketio.run(app, debug=True)
