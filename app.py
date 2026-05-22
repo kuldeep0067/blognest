@@ -1608,15 +1608,33 @@ def forbidden(error):
 def not_found(error):
     return render_template("404.html"), 404
 
+online_users = {}
+
 @socketio.on("connect")
 def handle_connect():
     print("User connected")
 
+@socketio.on("user_connected")
+def handle_user_connected(data):
+    username = data["username"]
+
+    online_users[request.sid] = username
+
+    socketio.emit(
+        "online_users",
+        list(set(online_users.values()))
+    )
+
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    print("User disconnected")
+    if request.sid in online_users:
+        del online_users[request.sid]
 
+    socketio.emit(
+        "online_users",
+        list(set(online_users.values()))
+    )
 
 @socketio.on("send_message")
 def handle_send_message(data):
