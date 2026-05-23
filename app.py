@@ -1667,6 +1667,14 @@ def handle_send_message(data):
     return {
         "success": True
     }
+    
+@socketio.on_error_default
+def default_error_handler(e):
+
+    print(
+        "Socket error:",
+        str(e)
+    )    
 
 with app.app_context():
     db.create_all()
