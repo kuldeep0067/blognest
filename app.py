@@ -1667,6 +1667,19 @@ def handle_send_message(data):
     return {
         "success": True
     }
+ 
+@socketio.on("typing")
+def handle_typing(data):
+
+    emit(
+        "user_typing",
+        {
+            "username":
+                data["username"]
+        },
+        broadcast=True,
+        include_self=False
+    )
     
 @socketio.on_error_default
 def default_error_handler(e):
