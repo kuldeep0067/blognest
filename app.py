@@ -1,5 +1,6 @@
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime,  timedelta
+
 import re
 import os
 import secrets
@@ -1638,6 +1639,9 @@ def handle_disconnect():
 
 @socketio.on("send_message")
 def handle_send_message(data):
+    
+    print("Message received:", data)
+    
     chat_message = ChatMessage(
         username=data["username"],
         message=data["message"]
@@ -1646,7 +1650,10 @@ def handle_send_message(data):
     db.session.add(chat_message)
     db.session.commit()
 
-    data["created_at"] = chat_message.created_at.strftime(
+    data["created_at"] = (
+        chat_message.created_at
+        + timedelta(hours=5, minutes=30)
+    ).strftime(
         "%d %b %Y, %I:%M %p"
     )
 
