@@ -1639,9 +1639,9 @@ def handle_disconnect():
 
 @socketio.on("send_message")
 def handle_send_message(data):
-    
+
     print("Message received:", data)
-    
+
     chat_message = ChatMessage(
         username=data["username"],
         message=data["message"]
@@ -1650,17 +1650,23 @@ def handle_send_message(data):
     db.session.add(chat_message)
     db.session.commit()
 
-    data["created_at"] = (
-        chat_message.created_at
-        + timedelta(hours=5, minutes=30)
-    ).strftime(
-        "%d %b %Y, %I:%M %p"
+    message_data = {
+        "id": chat_message.id,
+        "username": data["username"],
+        "message": data["message"],
+        "created_at":
+            chat_message.created_at.isoformat()
+    }
+
+    emit(
+        "receive_message",
+        message_data,
+        broadcast=True
     )
 
-    socketio.emit(
-        "receive_message",
-        data
-    )
+    return {
+        "success": True
+    }
 
 with app.app_context():
     db.create_all()
